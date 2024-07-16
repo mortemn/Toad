@@ -1,0 +1,26 @@
+# dune exec toad -w
+# OCAMLPARAM: unset
+# Shared cache: disabled
+# Shared cache location: /Users/colinlam/.cache/dune/db
+# Workspace root: /Users/colinlam/Desktop/code/personal/toad
+# Auto-detected concurrency: 10
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }
+$ /Users/colinlam/.opam/4.14.0/bin/ocamlc.opt -config > /var/folders/2s/dyw_f6v13p1cfj8bnjx8cj000000gn/T/dune_0f78a8_output
+$ (cd _build/default && /Users/colinlam/.opam/4.14.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I bin/.main.eobjs/byte -I bin/.main.eobjs/native -I /Users/colinlam/.opam/4.14.0/lib/ppx_deriving/runtime -I /Users/colinlam/.opam/4.14.0/lib/result -I lib/.toad.objs/byte -I lib/.toad.objs/native -intf-suffix .ml -no-alias-deps -opaque -o bin/.main.eobjs/native/dune__exe__Main.cmx -c -impl bin/main.ml)
+$ (cd _build/default && /Users/colinlam/.opam/4.14.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -o bin/main.exe /Users/colinlam/.opam/4.14.0/lib/result/result.cmxa /Users/colinlam/.opam/4.14.0/lib/ppx_deriving/runtime/ppx_deriving_runtime.cmxa lib/toad.cmxa bin/.main.eobjs/native/dune__exe__Main.cmx)
+$ (cd _build/.sandbox/4775c3fab31a4f2b3b17f7ec9f8e8f20/default && .ppx/52c49c7c6bc3dda051f54733e606b527/ppx.exe --cookie 'library-name="toad"' -o lib/parser.pp.ml --impl lib/parser.ml -corrected-suffix .ppx-corrected -diff-cmd - -dump-ast)
+$ (cd _build/default && /Users/colinlam/.opam/4.14.0/bin/ocamldep.opt -modules -impl lib/parser.pp.ml) > _build/default/lib/.toad.objs/toad__Parser.impl.d
+$ (cd _build/default && /Users/colinlam/.opam/4.14.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I lib/.toad.objs/byte -I /Users/colinlam/.opam/4.14.0/lib/ppx_deriving/runtime -I /Users/colinlam/.opam/4.14.0/lib/result -no-alias-deps -opaque -open Toad -o lib/.toad.objs/byte/toad__Parser.cmo -c -impl lib/parser.pp.ml)
+$ (cd _build/default && /Users/colinlam/.opam/4.14.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I bin/.main.eobjs/byte -I /Users/colinlam/.opam/4.14.0/lib/ppx_deriving/runtime -I /Users/colinlam/.opam/4.14.0/lib/result -I lib/.toad.objs/byte -no-alias-deps -opaque -o bin/.main.eobjs/byte/dune__exe__Main.cmi -c -intf bin/main.mli)
+$ (cd _build/default && /Users/colinlam/.opam/4.14.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I bin/.main.eobjs/byte -I bin/.main.eobjs/native -I /Users/colinlam/.opam/4.14.0/lib/ppx_deriving/runtime -I /Users/colinlam/.opam/4.14.0/lib/result -I lib/.toad.objs/byte -I lib/.toad.objs/native -intf-suffix .ml -no-alias-deps -opaque -o bin/.main.eobjs/native/dune__exe__Main.cmx -c -impl bin/main.ml)
+$ (cd _build/default && /Users/colinlam/.opam/4.14.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I lib/.toad.objs/byte -I lib/.toad.objs/native -I /Users/colinlam/.opam/4.14.0/lib/ppx_deriving/runtime -I /Users/colinlam/.opam/4.14.0/lib/result -intf-suffix .ml -no-alias-deps -opaque -open Toad -o lib/.toad.objs/native/toad__Parser.cmx -c -impl lib/parser.pp.ml)
+$ (cd _build/default && /Users/colinlam/.opam/4.14.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o lib/toad.cmxa lib/.toad.objs/native/toad.cmx lib/.toad.objs/native/toad__Token.cmx lib/.toad.objs/native/toad__Ast.cmx lib/.toad.objs/native/toad__Lexer.cmx lib/.toad.objs/native/toad__Parser.cmx)
+$ (cd _build/default && /Users/colinlam/.opam/4.14.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -o bin/main.exe /Users/colinlam/.opam/4.14.0/lib/result/result.cmxa /Users/colinlam/.opam/4.14.0/lib/ppx_deriving/runtime/ppx_deriving_runtime.cmxa lib/toad.cmxa bin/.main.eobjs/native/dune__exe__Main.cmx)

@@ -1,0 +1,5 @@
+(library
+ (name toad)
+ (modules ast parser lexer token)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.ord)))
