@@ -29,6 +29,7 @@ let parse_precedence = function
   | Token.LT | Token.GT -> LESSGREATER
   | Token.PLUS | Token.MINUS -> SUM
   | Token.ASTERISK | Token.SLASH -> PRODUCT
+  | Token.LPAREN -> CALL
   | _ -> LOWEST
 
 let rec parse p =
@@ -72,6 +73,12 @@ and goto_semicolon p =
   | Some Token.SEMICOLON -> p
   | _ -> goto_semicolon (next p)
 
+and expect_peek p t =
+  match p.next with
+  | Some t' when t == t' -> Ok (next p)
+  | Some t' -> Error ("Expected " ^ (show t) ^ ", got " ^ (show t'))
+  | None -> Error "No tokens given"
+
 and peek_precedence p =
   match p.next with
   | Some t -> Ok (parse_precedence t)
@@ -94,6 +101,13 @@ and parse_ident p =
   let open Ast in
   match p.next with
   | Some (Token.IDENT s) -> Ok (next p, { ident = s })
+  | Some t -> Error ("Expected identifier, got " ^ (Token.show_token t))
+  | None -> Error "No tokens given"
+
+and parse_ident_rec p =
+  let open Ast in
+  match p.current with
+  | Some Token.IDENT ident -> Ok { ident }
   | Some t -> Error ("Expected identifier, got " ^ (Token.show_token t))
   | None -> Error "No tokens given"
 
@@ -129,11 +143,56 @@ and parse_infix_expr p left =
   let* p, right = parse_expression p precedence in
   Ok (p, Ast.Infix { left; operator; right })
 
+and parse_boolean_expr p =
+  match p.current with
+  | Some Token.TRUE -> Ok (p, Ast.Boolean { value = true })
+  | Some Token.FALSE -> Ok (p, Ast.Boolean { value = false })
+  | Some t -> Error ("Expected boolean, got " ^ (Token.show_token t))
+  | None -> Error "No tokens given"
+
+and parse_grouped_expr p =
+  let p = next p in
+  let* p, expression = parse_expression p LOWEST in
+  match p.next with
+  | Some Token.RPAREN -> Ok (next p, expression)
+  | Some t -> Error ("Expected ), got " ^ (Token.show_token t))
+  | None -> Error "No tokens given"
+
+and parse_if_expr p =
+  let* p = expect_peek p Token.LPAREN in
+  let p = next p in
+  let* p, condition = parse_expression p LOWEST in
+  let* p = expect_peek p Token.RPAREN in
+  let* p = expect_peek p Token.LBRACE in
+  let* p, consequence = parse_block_stmt p in
+  match p.next with
+  | Some Token.ELSE ->
+    let p = next p in
+    let* p = expect_peek p Token.LBRACE in
+    let* p, alternative = parse_block_stmt p in
+    Ok (p, Ast.If { condition; consequence; alternative })
+  | _ -> Ok (p, Ast.If { condition; consequence; alternative = [] })
+
+and parse_function_expr p =
+  let* p = expect_peek p Token.LPAREN in
+  let* p, parameters = parse_function_parameters p in
+  let* p = expect_peek p Token.LBRACE in
+  let* p, body = parse_block_stmt p in
+  Ok (p, Ast.Function { parameters; body })
+
+and parse_call_expr p left =
+  let* p, arguments = parse_call_arguments p in
+  Ok (p, Ast.Call { call_function = left; arguments })
+
 and parse_prefix p t =
   match t with
   | Token.IDENT _ -> parse_ident_expr p
   | Token.INT _ -> parse_int_expr p
   | Token.BANG | Token.MINUS -> parse_prefix_expr p
+  | Token.TRUE | Token.FALSE -> parse_boolean_expr p
+  | Token.LPAREN -> parse_grouped_expr p
+  | Token.IF -> parse_if_expr p
+  | Token.FUNCTION -> parse_function_expr p
   | _ -> Error ("No prefix parser found, got " ^ (Token.show_token t))
 
 and parse_infix p t l =
@@ -141,12 +200,15 @@ and parse_infix p t l =
   | Some Token.PLUS | Some Token.MINUS | Some Token.ASTERISK 
   | Some Token.SLASH | Some Token.EQ | Some Token.NOT_EQ 
   | Some Token.LT | Some Token.GT -> parse_infix_expr (next p) l
+  | Some Token.LPAREN -> parse_call_expr (next p) l
   | _ -> Error "No infix parser found"
 
 and parse_let p =
   let* p, name = parse_ident p in
-  let value = Ast.Int(42) in
-  let p = goto_semicolon p in
+  let* p = expect_peek p Token.ASSIGN in
+  let p = next p in
+  let* p, value = parse_expression p LOWEST in
+  let p = if peek_semicolon p then next p else p in
   Ok (p, Ast.Let_Stmt { name; value })
 
 and parse_return p =
@@ -157,3 +219,53 @@ and parse_expression_stmt p =
   let* p, expression = parse_expression p LOWEST in
   let p = if peek_semicolon p then next p else p in
   Ok (p, Ast.Expression_Stmt expression)
+
+and parse_block_stmt p =
+  let rec parse_block_stmt' p statements =
+    match p.current with
+    | Some Token.RBRACE | Some Token.EOF -> 
+      Ok (p, (List.rev statements))
+    | Some _ -> (match parse_statement p with
+      | Ok (p, stmt) -> parse_block_stmt' (next p) (stmt :: statements)
+      | Error msg -> Error msg)
+    | None -> Error "No tokens given"
+  in
+  parse_block_stmt' (next p) []
+
+and parse_function_parameters p =
+  let rec parse_function_parameters' p parameters =
+    match p.next with
+    | Some Token.COMMA ->
+      let p = next (next p) in
+      let* ident = parse_ident_rec p in
+      parse_function_parameters' p (ident :: parameters)
+    | _ -> Ok (p, List.rev parameters)
+  in
+  match p.next with
+  | Some Token.RPAREN -> Ok (next p, [])
+  | Some _ -> 
+    let p = next p in
+    let* ident = parse_ident_rec p in
+    let* p, parameters = parse_function_parameters' p [ident] in
+    let* p = expect_peek p Token.RPAREN in
+    Ok (p, parameters)
+  | None -> Error "No tokens given"
+
+and parse_call_arguments p =
+  let rec parse_call_arguments' p parameters =
+    match p.next with
+    | Some Token.COMMA ->
+      let p = next (next p) in
+      let* p, arg = parse_expression p LOWEST in
+      parse_call_arguments' p (arg :: parameters)
+    | _ -> Ok (p, List.rev parameters)
+  in
+  match p.next with
+  | Some Token.RPAREN -> Ok (next p, [])
+  | Some _ -> 
+    let p = next p in
+    let* p, arg = parse_expression p LOWEST in
+    let* p, parameters = parse_call_arguments' p [arg] in
+    let* p = expect_peek p Token.RPAREN in
+    Ok (p, parameters)
+  | None -> Error "No tokens given"

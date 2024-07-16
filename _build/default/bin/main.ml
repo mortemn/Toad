@@ -9,8 +9,7 @@ let _print_tokens lexer =
   List.iter (Printf.printf "%s\n") tokens
 
 let lexer = Toad.Lexer.init "
-  a + b - c;
-  "
+let x = 2 * 3"
 
 (* let () = print_tokens lexer *)
 

@@ -15,6 +15,5 @@ and statement =
   | Let_Stmt of { name : ident; value : expression }
   | Return_Stmt of expression
   | Expression_Stmt of expression
-  | Block_Stmt of statement list
 and ident = { ident : string }
 [@@deriving show]

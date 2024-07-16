@@ -35,7 +35,7 @@ type token =
 [@@deriving show]
 
 let lookup_ident = function
-  | "function" -> FUNCTION
+  | "fn" -> FUNCTION
   | "let" -> LET
   | "if" -> IF
   | "else" -> ELSE
