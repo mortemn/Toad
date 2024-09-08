@@ -1,8 +1,0 @@
-lib: [
-  "_build/install/default/lib/toad/META"
-  "_build/install/default/lib/toad/dune-package"
-  "_build/install/default/lib/toad/opam"
-]
-bin: [
-  "_build/install/default/bin/toad"
-]

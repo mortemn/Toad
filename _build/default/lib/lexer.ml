@@ -27,7 +27,7 @@ let peek lexer =
     String.get lexer.input np
 
 let is_next lexer ch t_token f_token =
-  if peek lexer == ch then
+  if peek lexer = ch then
     read_char (read_char lexer), t_token
   else
     read_char lexer, f_token

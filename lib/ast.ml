@@ -1,6 +1,4 @@
 type node =
-  | Statement of statement
-  | Expression of expression
   | Program of statement list
 and expression =
   | Identifier of ident

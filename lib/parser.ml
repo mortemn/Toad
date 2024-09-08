@@ -75,7 +75,7 @@ and goto_semicolon p =
 
 and expect_peek p t =
   match p.next with
-  | Some t' when t == t' -> Ok (next p)
+  | Some t' when t = t' -> Ok (next p)
   | Some t' -> Error ("Expected " ^ (show t) ^ ", got " ^ (show t'))
   | None -> Error "No tokens given"
 
@@ -212,8 +212,10 @@ and parse_let p =
   Ok (p, Ast.Let_Stmt { name; value })
 
 and parse_return p =
-  let p = goto_semicolon p in
-  Ok (p, Ast.Return_Stmt (Ast.Int 42))
+  let p = next p in
+  let* p, value = parse_expression p LOWEST in
+  let p = if peek_semicolon p then next p else p in
+  Ok (p, Ast.Return_Stmt (value))
 
 and parse_expression_stmt p =
   let* p, expression = parse_expression p LOWEST in

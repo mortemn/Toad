@@ -1,5 +1,5 @@
 (library
  (name toad)
- (modules ast parser lexer token)
+ (modules ast parser lexer token evaluator environment repl object)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.ord)))

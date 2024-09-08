@@ -3,11 +3,23 @@
 (** @canonical Toad.Ast *)
 module Ast = Toad__Ast
 
+(** @canonical Toad.Environment *)
+module Environment = Toad__Environment
+
+(** @canonical Toad.Evaluator *)
+module Evaluator = Toad__Evaluator
+
 (** @canonical Toad.Lexer *)
 module Lexer = Toad__Lexer
 
+(** @canonical Toad.Object *)
+module Object = Toad__Object
+
 (** @canonical Toad.Parser *)
 module Parser = Toad__Parser
+
+(** @canonical Toad.Repl *)
+module Repl = Toad__Repl
 
 (** @canonical Toad.Token *)
 module Token = Toad__Token
