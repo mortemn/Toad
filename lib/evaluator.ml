@@ -24,7 +24,12 @@ and eval_expression obj env =
     eval_infix_expr operator (eval (Expression left) env) (eval (Expression right) env)
   | Ast.If { condition; consequence; alternative } ->  eval_if_expr condition consequence alternative env
   | Ast.Identifier { ident } -> Environment.get env ident
-  | _ -> Error "Invalid expression"
+  | Ast.Function { parameters; body } ->  Ok (Object.Function { parameters; body; env })
+  | Ast.Call { call_function; arguments } -> (
+    let* function_obj = eval (Expression call_function) env in
+    let* arguments = eval_expressions arguments env in
+    apply_function function_obj arguments
+  )
 
 and eval_statement obj env =
   match obj with
@@ -38,6 +43,34 @@ and eval_statement obj env =
     Environment.set env name.ident value;
     Ok (Object.Null)
 
+and eval_expressions expressions env =
+  match expressions with
+  | [] -> Ok []
+  | h :: t -> (match eval (Expression h) env with
+    | Ok obj -> let* rest = eval_expressions t env in Ok (obj :: rest)
+    | Error msg -> Error msg)
+
+and apply_function function_obj arguments =
+  match function_obj with
+  | Object.Function { parameters; body; env } ->
+    let* extended_env = extend_env env parameters arguments in
+    let* evaluated = eval_block body Object.Null extended_env in
+    Ok(evaluated)
+  | _ -> Error "Not a function"
+
+and extend_env env parameters arguments =
+  let env = Environment.new_enclosed env in
+  let rec extend_env' env parameters arguments =
+    match parameters, arguments with
+    | [], [] -> Ok env
+    | h1 :: t1, h2 :: t2 -> (
+      Environment.set env h1.Ast.ident h2;
+      extend_env' env t1 t2
+    )
+    | _ -> Error "Invalid function call"
+  in
+  extend_env' env parameters arguments
+
 and eval_program statements evaluation env =
   match statements with
   | [] ->  Ok (evaluation)
@@ -49,7 +82,7 @@ and eval_program statements evaluation env =
 and eval_block statements evaluation env =
   match statements with
   | [] -> Ok (evaluation)
-  | h :: t -> match eval h env with
+  | h :: t -> match eval (Statement h) env with
     | Ok Object.ReturnValue obj -> Ok (Object.ReturnValue obj)
     | Ok obj -> eval_block t obj env
     | Error msg -> Error msg
@@ -91,10 +124,10 @@ and eval_if_expr condition consequence alternative env =
   let* condition = eval (Expression condition) env in
 
   match is_truthy condition with
-  | true -> eval_block (wrap_statements consequence) Object.Null env
+  | true -> eval_block consequence Object.Null env
   | false -> match alternative with
     | [] -> Ok (Object.Null)
-    | _ -> eval_block (wrap_statements alternative) Object.Null env
+    | _ -> eval_block alternative Object.Null env
 
 and is_truthy = function
   | Object.Null -> false

@@ -1,1 +1,1 @@
-lib/environment.pp.ml: Map Object String
+lib/environment.pp.ml: Map Ppx_deriving_runtime String
