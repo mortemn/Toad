@@ -1,7 +1,7 @@
 # Toad
 A minimal interpreter written in OCaml inspired by the book Writing an Interpreter in Go by Thorsten Ball.
 ## How to build
-To run the interpreter, make sure you have opam and dune installed. Then clone the project and run the commands
+To run the REPL, make sure you have opam and dune installed. Then clone the project and run the commands
 
 ```
 opam install . --deps-only
