@@ -1,0 +1,16 @@
+# dune exec toadls
+# OCAMLPARAM: unset
+# Shared cache: disabled
+# Shared cache location: /Users/colinlam/.cache/dune/db
+# Workspace root: /Users/colinlam/Desktop/code/personal/toad
+# Auto-detected concurrency: 10
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }
+$ /Users/colinlam/.opam/4.14.0/bin/ocamlc.opt -config > /var/folders/2s/dyw_f6v13p1cfj8bnjx8cj000000gn/T/dune_1008f5_output
