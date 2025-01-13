@@ -14,20 +14,20 @@ type precedence =
   | CALL
 [@@deriving show, ord]
 
-(** Binding operator *)
+(* Binding operator *)
 let ( let* ) = Result.bind
 
-(** Advances the lexer by one token *)
+(* Advances the lexer by one token *)
 let next p =
   let l, n = Lexer.next_token p.lexer in
   { lexer = l ; current = p.next; next = Some n }
 
-(** Initialises a new parser and fills current and next with corresponding tokens *)
+(* Initialises a new parser and fills current and next with corresponding tokens *)
   let init l =
   let p = { lexer = l; current = None ; next = None } in
   next (next p)
 
-(** Converts tokens to categories in precedence *)
+(* Converts tokens to categories in precedence *)
   let parse_precedence = function
   | Token.EQ | Token.NOT_EQ -> EQUALS
   | Token.LT | Token.GT -> LESSGREATER
@@ -36,7 +36,7 @@ let next p =
   | Token.LPAREN -> CALL
   | _ -> LOWEST
 
-(** *)
+(* Constructs a Ast.Program node, which is a parsed list of Ast.statement's *)
   let rec parse p =
   let rec parse' p statements =
     match p.current with
@@ -49,16 +49,21 @@ let next p =
   let* p, statements = parse' p [] in
   Ok (p, Ast.Program statements)
 
-and parse_expression p precedence =
+(* Utilise Pratt parsing to parse expressions *)
+  and parse_expression p precedence =
+  (* Parse any prefix expressions *)
   let* p, prefix = match p.current with
   | Some token -> parse_prefix p token
   | None -> Error "No tokens given"
   in
+  (* Parse infix expressions *)
   let rec recurse_infix p left =
     if peek_semicolon p then Ok (p, left) else
     match peek_precedence p with
     | Ok next_precedence when precedence < next_precedence ->
       (match parse_infix p p.next left with
+      (* If current precedence smaller than next operator's precedence, for example after (a - b),
+      there is a -c, SUM > LOWEST, so the resulting expression would be (a - b) - c *)
       | Ok (p, infix) -> recurse_infix p infix
       | Error "No infix parser found" -> Ok (p, left)
       | Error msg -> Error msg)
@@ -66,14 +71,15 @@ and parse_expression p precedence =
   in
   recurse_infix p prefix
 
-and parse_statement p =
+(** Parses an individual statement *)
+  and parse_statement p =
   match p.current with
   | Some Token.LET -> parse_let p
   | Some Token.RETURN -> parse_return p
   | Some _ -> parse_expression_stmt p
   | None -> Error "No tokens given"
 
-and goto_semicolon p =
+  and goto_semicolon p =
   match p.current with
   | Some Token.SEMICOLON -> p
   | _ -> goto_semicolon (next p)
@@ -144,6 +150,7 @@ and parse_infix_expr p left =
     | None -> Error "No tokens given"
   in
   let* precedence = current_precedence p in
+  (* After this line, current will point to the second operand *)
   let p = next p in
   let* p, right = parse_expression p precedence in
   Ok (p, Ast.Infix { left; operator; right })
