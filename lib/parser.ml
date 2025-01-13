@@ -14,17 +14,21 @@ type precedence =
   | CALL
 [@@deriving show, ord]
 
+(** Binding operator *)
 let ( let* ) = Result.bind
 
+(** Advances the lexer by one token *)
 let next p =
   let l, n = Lexer.next_token p.lexer in
   { lexer = l ; current = p.next; next = Some n }
 
-let init l =
+(** Initialises a new parser and fills current and next with corresponding tokens *)
+  let init l =
   let p = { lexer = l; current = None ; next = None } in
   next (next p)
 
-let parse_precedence = function
+(** Converts tokens to categories in precedence *)
+  let parse_precedence = function
   | Token.EQ | Token.NOT_EQ -> EQUALS
   | Token.LT | Token.GT -> LESSGREATER
   | Token.PLUS | Token.MINUS -> SUM
@@ -32,7 +36,8 @@ let parse_precedence = function
   | Token.LPAREN -> CALL
   | _ -> LOWEST
 
-let rec parse p =
+(** *)
+  let rec parse p =
   let rec parse' p statements =
     match p.current with
     | Some Token.EOF -> Ok (p, List.rev statements)
